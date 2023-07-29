@@ -10,7 +10,7 @@ const intialSession = require('./session.json')
 require('dotenv').config()
 
 const PHOTO = 'file.jpg'
-let SPAM = 'Hello Everyone!'
+let SPAM = 'hello oil'
 let LATITUDE = 25.254857//37.468766
 let LONGITUDE = 55.329514//126.936944
 let INTERVAL = 1
@@ -34,6 +34,7 @@ let CANDIDATE_DATA = {
 const bot = new TelegramApi(BOT_TOKEN, { polling: true })
 bot.setMyCommands([
     { command: '/start', description: 'restart' },
+    { command: '/run', description: "start sending messages"},
     { command: '/check_int', description: 'how often posts are been sending' },
     { command: '/check_lct', description: 'current location' },
     { command: '/check_sndr', description: 'who sends posts' },
@@ -45,21 +46,24 @@ let client = new TelegramClient(sesssion, API_ID, API_HASH, {});
 async function getChats() {
     console.log(LONGITUDE)
     console.log(LATITUDE)
+    const geoPoint = new Api.InputGeoPoint({
+        lat: LATITUDE,
+        long: LONGITUDE,
+        accuracyRadius: 40,
+    })
+    console.log(geoPoint)
+    const api  = new Api.contacts.GetLocated({
+        geoPoint: geoPoint,
+        selfExpires: 1
+    })
+    console.log(api)
     const result = await client.invoke(
-        new Api.contacts.GetLocated({
-            geoPoint: new Api.InputGeoPoint({
-                lat: LATITUDE,
-                long: LONGITUDE,
-                accuracyRadius: 4300,
-            }),
-            selfExpires: 43,
-        })
+        api
     );
     return result.chats
 }
 
 module.exports.runBot = async () => {
-
 
     await client.connect()
 
@@ -89,13 +93,16 @@ module.exports.runBot = async () => {
             await handlePhoto(fileId)
             return bot.sendMessage(LOGIN_CANDIADATE, "Message was updated successfully")
         }
+        if(text == '/run') {
+            rescheduleCronJob(INTERVAL);
+            return bot.sendMessage(chatId, `Messages will be sent every ${INTERVAL} hours`)
+        }
         if (text.includes('interval')) {
             let interval = parseDataFromString(text, 'interval')
             if(!Number(interval) || Number(interval) > 23 || Number(interval) < 1) {
                 return bot.sendMessage(LOGIN_CANDIADATE, "Send only number between 1~23")    
              }
              INTERVAL = Number(interval);
-             scheduleCronJob(interval);
             return bot.sendMessage(LOGIN_CANDIADATE, "Interval was updated successfully")
         }
         if(text.includes('sender')) {
@@ -187,19 +194,21 @@ let scheduledJob; // Variable to store the scheduled cron job
 
 // Function to be called by cron
 async function taskFunction() {
-
+    console.log('try fetch groups')
    // await client.connect()
     let chats = await getChats()
-
-    client.floodSleepThreshold = 500; // sleeps if the wait is lower than 300 seconds
-    console.log(chats)
+    client.floodSleepThreshold = 60; // sleeps if the wait is lower than 300 seconds
+    console.log("fetched this groups", chats.map(e => e.title))
     for (const i of chats) {
+        if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted) continue;
+        console.log('try to join');
+        console.log(i)
         const result = await client.invoke(
             new Api.channels.JoinChannel({
                 channel: i.id,
             })
         );
-        console.log(result);
+        console.log('tried to join');
         await sendPost(i.id);
     }
     console.log("end of sending")
@@ -211,13 +220,15 @@ async function sendPost(chatId) {
     if (fs.existsSync(PHOTO)) {
         post.file = `./${PHOTO}`
     }
+    console.log("try to send message");
+
     const msgSend = await client.sendMessage(chatId, post);
 
-    console.log(msgSend);
+    console.log("tried to send message", msgSend);
 }
 
 // Cron job function that schedules the taskFunction based on the Interval
-function scheduleCronJob(interval) {
+function rescheduleCronJob(interval) {
     const cronExpression = `*/${interval} * * * *`; // Cron expression for the Interval in minutes
     // Clear the previous cron job before scheduling the new one
     if (scheduledJob) {
