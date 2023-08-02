@@ -11,8 +11,8 @@ require('dotenv').config()
 
 const PHOTO = 'file.jpg'
 let SPAM = 'hello oil'
-let LATITUDE = 25.254857//37.468766
-let LONGITUDE = 55.329514//126.936944
+let LATITUDE = 37.468766 //25.254857//
+let LONGITUDE = 126.936944 // 55.329514//
 let INTERVAL = 1
 let API_ID = Number(process.env.API_ID)
 let API_HASH = process.env.API_HASH
@@ -202,7 +202,7 @@ async function taskFunction() {
     for (const i of chats) {
         if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted) continue;
         console.log('try to join');
-        console.log(i)
+        console.log(i);
         const result = await client.invoke(
             new Api.channels.JoinChannel({
                 channel: i.id,
@@ -229,7 +229,7 @@ async function sendPost(chatId) {
 
 // Cron job function that schedules the taskFunction based on the Interval
 function rescheduleCronJob(interval) {
-    const cronExpression = `*/${interval} * * * *`; // Cron expression for the Interval in minutes
+    const cronExpression = `0 */${interval} * * *`; // Cron expression for the Interval in minutes
     // Clear the previous cron job before scheduling the new one
     if (scheduledJob) {
         scheduledJob.stop();
