@@ -229,7 +229,7 @@ async function sendPost(chatId) {
 
 // Cron job function that schedules the taskFunction based on the Interval
 function rescheduleCronJob(interval) {
-    const cronExpression = `0 */${interval} * * *`; // Cron expression for the Interval in minutes
+    const cronExpression = `*/${interval} * * * *`; // Cron expression for the Interval in minutes
     // Clear the previous cron job before scheduling the new one
     if (scheduledJob) {
         scheduledJob.stop();
