@@ -95,11 +95,11 @@ module.exports.runBot = async () => {
         }
         if(text == '/run') {
             rescheduleCronJob(INTERVAL);
-            return bot.sendMessage(chatId, `Messages will be sent every ${INTERVAL} hours`)
+            return bot.sendMessage(chatId, `Messages will be sent every ${INTERVAL} minutes`)
         }
         if (text.includes('interval')) {
             let interval = parseDataFromString(text, 'interval')
-            if(!Number(interval) || Number(interval) > 23 || Number(interval) < 1) {
+            if(!Number(interval) || Number(interval) > 59 || Number(interval) < 1) {
                 return bot.sendMessage(LOGIN_CANDIADATE, "Send only number between 1~23")    
              }
              INTERVAL = Number(interval);
