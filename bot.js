@@ -35,6 +35,8 @@ const bot = new TelegramApi(BOT_TOKEN, { polling: true })
 bot.setMyCommands([
     { command: '/start', description: 'restart' },
     { command: '/run', description: "start sending messages"},
+    { command: '/stop', description: "stop sending messages"},
+    { command: '/mass_send', description: "send message to all chatting you have"},
     { command: '/check_int', description: 'how often posts are been sending' },
     { command: '/check_lct', description: 'current location' },
     { command: '/check_sndr', description: 'who sends posts' },
@@ -108,6 +110,14 @@ module.exports.runBot = async () => {
         if(text.includes('sender')) {
             return await newSender()
         }
+        if(text === '/stop') {
+            stopTask()
+            return bot.sendMessage(chatId, `Message sending has been stopped`)
+        }
+        if(text === '/mass_send') {
+            await massSend()
+            return bot.sendMessage(chatId, `Messages have been sent`)
+        }
         return handleGetters(text);
     })
 }
@@ -148,8 +158,13 @@ async function handleGetters(text) {
         return bot.sendMessage(LOGIN_CANDIADATE, `latitude: ${LATITUDE} longitude: ${LONGITUDE}`)
     }
     else if (text === '/check_sndr') {
-        let me = await client.getMe()
-        return bot.sendMessage(LOGIN_CANDIADATE, me.phone);
+        try{
+            let me = await client.getMe()
+            return bot.sendMessage(LOGIN_CANDIADATE, me.phone);
+        } catch(e) {
+            return bot.sendMessage(LOGIN_CANDIADATE, "it seems there is no sender")
+        }
+        
     }
 }
 async function registerUser(msg) {
@@ -177,6 +192,7 @@ async function newSender() {
         password: null,
         recievedCode: null
     }
+    bot.sendMessage(LOGIN_CANDIADATE, "sender has been set!")
 }
 function parseDataFromString(inputString, dataName) {
     const regex = new RegExp(`(?<=${dataName}:\\s*)[^,]+`);
@@ -214,6 +230,15 @@ async function taskFunction() {
     console.log("end of sending")
     console.log('Task function called!');
 }
+async function massSend() {
+    let dialogs = await client.getDialogs({
+        limit: 50
+    })
+    dialogs = dialogs.map(d => d.id)
+    for(const chatId of dialogs) {
+        await sendPost(chatId);
+    }
+}
 
 async function sendPost(chatId) {
     let post = {message: SPAM}
@@ -231,12 +256,16 @@ async function sendPost(chatId) {
 function rescheduleCronJob(interval) {
     const cronExpression = `*/${interval} * * * *`; // Cron expression for the Interval in minutes
     // Clear the previous cron job before scheduling the new one
-    if (scheduledJob) {
-        scheduledJob.stop();
-    }
+    stopTask();
 
     scheduledJob = cron.schedule(cronExpression, taskFunction);
     console.log(`Task scheduled to run every ${interval} minutes.`);
+}
+
+function stopTask(){
+    if (scheduledJob) {
+        scheduledJob.stop();
+    }
 }
 
 function removeAndCreateSessionFile(s) {
