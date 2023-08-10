@@ -1,7 +1,7 @@
 const express = require('express');
 const { runBot, getChats, sendSpam } = require('./bot');
 const app = express();
-const port = 4000//process.env.PORT;
+const port = process.env.PORT;
 
 runBot();
 
