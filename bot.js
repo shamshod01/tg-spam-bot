@@ -6,8 +6,10 @@ const fs = require('fs');
 const request = require('request');
 const path = require('path');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-const intialSession = require('./session.json')
 require('dotenv').config()
+
+const intialSession = require('./session.json')
+const {calculateNewCoordinates} = require('./utils');
 
 const PHOTO = 'file.jpg'
 let SPAM = 'hello oil'
@@ -20,8 +22,8 @@ let SESSION_STRING = intialSession.sessionString
 const BOT_TOKEN = process.env.BOT_TOKEN
 const LOGIN = process.env.LOGIN
 const PASSWORD = process.env.PASSWORD
-
-
+let TEMP_LATITUDE = LATITUDE;
+let TEMP_LONGITUDE = LONGITUDE;
 
 let LOGIN_CANDIADATE = 218834326
 let CANDIDATE_DATA = {
@@ -46,11 +48,11 @@ const sesssion = new StringSession(SESSION_STRING)
 let client = new TelegramClient(sesssion, API_ID, API_HASH, {});
 
 async function getChats() {
-    console.log(LONGITUDE)
-    console.log(LATITUDE)
+    console.log(TEMP_LONGITUDE)
+    console.log(TEMP_LATITUDE)
     const geoPoint = new Api.InputGeoPoint({
-        lat: LATITUDE,
-        long: LONGITUDE,
+        lat: TEMP_LATITUDE,
+        long: TEMP_LONGITUDE,
         accuracyRadius: 40,
     })
     console.log(geoPoint)
@@ -215,19 +217,23 @@ async function taskFunction() {
     let chats = await getChats()
     client.floodSleepThreshold = 60; // sleeps if the wait is lower than 300 seconds
     console.log("fetched this groups", chats.map(e => e.title))
-    for (const i of chats) {
-        if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted) continue;
-        console.log('try to join');
-        console.log(i);
-        const result = await client.invoke(
-            new Api.channels.JoinChannel({
-                channel: i.id,
-            })
-        );
-        console.log('tried to join');
-        await sendPost(i.id);
-    }
-    console.log("end of sending")
+    await bot.sendMessage(LOGIN_CANDIADATE, JSON.stringify(chats.map(e => e.title)))
+    // for (const i of chats) {
+    //     if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted) continue;
+    //     console.log('try to join');
+    //     console.log(i);
+    //     // const result = await client.invoke(
+    //     //     new Api.channels.JoinChannel({
+    //     //         channel: i.id,
+    //     //     })
+    //     // );
+    //     console.log('tried to join');
+    //    // await sendPost(i.id);
+    // }
+    console.log("end of sending");
+    const newLocation = calculateNewCoordinates(LATITUDE, LONGITUDE);
+    TEMP_LATITUDE = newLocation.latitude;
+    TEMP_LONGITUDE = newLocation.longitude;
     console.log('Task function called!');
 }
 async function massSend() {
