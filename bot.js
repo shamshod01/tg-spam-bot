@@ -76,7 +76,7 @@ module.exports.runBot = async () => {
         const text = msg.text ? msg.text : ''
         const chatId = msg.chat.id
 
-        console.log(msg)
+//        console.log(msg)
         if (text === '/start') {
             return bot.sendSticker(chatId, 'CAACAgIAAxkBAAICeGTDbLZvdR46W50TsUyZ3v2Hf3jQAAL7BQAClvoSBZdb7eV44WgWLwQ')
         }
@@ -212,25 +212,26 @@ let scheduledJob; // Variable to store the scheduled cron job
 
 // Function to be called by cron
 async function taskFunction() {
-    console.log('try fetch groups')
+   // console.log('try fetch groups')
    // await client.connect()
     let chats = await getChats()
     client.floodSleepThreshold = 60; // sleeps if the wait is lower than 300 seconds
-    console.log("fetched this groups", chats.map(e => e.title))
-    await bot.sendMessage(LOGIN_CANDIADATE, JSON.stringify(chats.map(e => e.title)))
-    // for (const i of chats) {
-    //     if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted) continue;
-    //     console.log('try to join');
-    //     console.log(i);
-    //     // const result = await client.invoke(
-    //     //     new Api.channels.JoinChannel({
-    //     //         channel: i.id,
-    //     //     })
-    //     // );
-    //     console.log('tried to join');
-    //    // await sendPost(i.id);
-    // }
+    //console.log("fetched this groups", chats.map(e => e.title))
+    for (const i of chats) {
+        if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted) continue;
+        console.log('try to join');
+        //console.log(i);
+        const result = await client.invoke(
+            new Api.channels.JoinChannel({
+                channel: i.id,
+            })
+        );
+        console.log('tried to join');
+        await sendPost(i.id);
+    }
     console.log("end of sending");
+    await bot.sendMessage(LOGIN_CANDIADATE, "message was sent to groups of this location")
+    await bot.sendLocation(LOGIN_CANDIADATE, TEMP_LATITUDE, TEMP_LONGITUDE)
     const newLocation = calculateNewCoordinates(LATITUDE, LONGITUDE);
     TEMP_LATITUDE = newLocation.latitude;
     TEMP_LONGITUDE = newLocation.longitude;
@@ -291,7 +292,7 @@ function removeFile(fileName) {
      if (fs.existsSync(fileName)) {
         // Remove the existing file
         fs.unlinkSync(fileName);
-        console.log(`'${fileName}' removed successfully.`);
+       console.log(`'${fileName}' removed successfully.`);
     }
 }
 
