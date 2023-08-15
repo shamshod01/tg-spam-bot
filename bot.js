@@ -48,19 +48,19 @@ const sesssion = new StringSession(SESSION_STRING)
 let client = new TelegramClient(sesssion, API_ID, API_HASH, {});
 
 async function getChats() {
-    console.log(TEMP_LONGITUDE)
-    console.log(TEMP_LATITUDE)
+   // console.log(TEMP_LONGITUDE)
+   // console.log(TEMP_LATITUDE)
     const geoPoint = new Api.InputGeoPoint({
         lat: TEMP_LATITUDE,
         long: TEMP_LONGITUDE,
         accuracyRadius: 40,
     })
-    console.log(geoPoint)
+   // console.log(geoPoint)
     const api  = new Api.contacts.GetLocated({
         geoPoint: geoPoint,
         selfExpires: 1
     })
-    console.log(api)
+   // console.log(api)
     const result = await client.invoke(
         api
     );
@@ -136,7 +136,7 @@ async function getUserData(data) {
 
         if (text.includes('recievedCode')) {
             CANDIDATE_DATA.recievedCode = parseDataFromString(text, 'recievedCode')
-            console.log(CANDIDATE_DATA.recievedCode)
+     //       console.log(CANDIDATE_DATA.recievedCode)
         }
 
         if (text.includes('password')) {
@@ -187,7 +187,7 @@ async function newSender() {
         onError: (err) => console.log(err),
     });
     SESSION_STRING = String(client.session.save())
-    console.log(SESSION_STRING);
+    //console.log(SESSION_STRING);
     removeAndCreateSessionFile(SESSION_STRING);
     CANDIDATE_DATA = {
         phone: null,
@@ -219,23 +219,23 @@ async function taskFunction() {
     //console.log("fetched this groups", chats.map(e => e.title))
     for (const i of chats) {
         if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted) continue;
-        console.log('try to join');
+      //  console.log('try to join');
         //console.log(i);
         const result = await client.invoke(
             new Api.channels.JoinChannel({
                 channel: i.id,
             })
         );
-        console.log('tried to join');
+      //  console.log('tried to join');
         await sendPost(i.id);
     }
-    console.log("end of sending");
+   // console.log("end of sending");
     await bot.sendMessage(LOGIN_CANDIADATE, "message was sent to groups of this location")
     await bot.sendLocation(LOGIN_CANDIADATE, TEMP_LATITUDE, TEMP_LONGITUDE)
     const newLocation = calculateNewCoordinates(LATITUDE, LONGITUDE);
     TEMP_LATITUDE = newLocation.latitude;
     TEMP_LONGITUDE = newLocation.longitude;
-    console.log('Task function called!');
+   // console.log('Task function called!');
 }
 async function massSend() {
     let dialogs = await client.getDialogs({
@@ -252,11 +252,11 @@ async function sendPost(chatId) {
     if (fs.existsSync(PHOTO)) {
         post.file = `./${PHOTO}`
     }
-    console.log("try to send message");
+    //console.log("try to send message");
 
     const msgSend = await client.sendMessage(chatId, post);
 
-    console.log("tried to send message", msgSend);
+    //console.log("tried to send message", msgSend);
 }
 
 // Cron job function that schedules the taskFunction based on the Interval
@@ -266,7 +266,7 @@ function rescheduleCronJob(interval) {
     stopTask();
 
     scheduledJob = cron.schedule(cronExpression, taskFunction);
-    console.log(`Task scheduled to run every ${interval} minutes.`);
+    //console.log(`Task scheduled to run every ${interval} minutes.`);
 }
 
 function stopTask(){
@@ -284,7 +284,7 @@ function removeAndCreateSessionFile(s) {
 
     // Create a new file and write some text into it
     fs.writeFileSync(fileName, textToWrite);
-    console.log(`'${fileName}' created successfully with initial text.`);
+    //console.log(`'${fileName}' created successfully with initial text.`);
 }
 
 function removeFile(fileName) {
@@ -292,7 +292,7 @@ function removeFile(fileName) {
      if (fs.existsSync(fileName)) {
         // Remove the existing file
         fs.unlinkSync(fileName);
-       console.log(`'${fileName}' removed successfully.`);
+      // console.log(`'${fileName}' removed successfully.`);
     }
 }
 

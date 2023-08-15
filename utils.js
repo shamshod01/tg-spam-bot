@@ -11,7 +11,7 @@ module.exports.calculateNewCoordinates = (latitude, longitude) => {
         MOVEMENT_DISTANCE = MOVE_FAR ? MOVEMENT_DISTANCE+1 : MOVEMENT_DISTANCE-1;
         DIRECTION = DIRECTION + 15 === 360 ? 0 : DIRECTION + 15
     }
-    console.log(MOVEMENT_DISTANCE, DIRECTION);
+  //  console.log(MOVEMENT_DISTANCE, DIRECTION);
     const angle = DIRECTION;
     const distance = MOVEMENT_DISTANCE*1000;
 
