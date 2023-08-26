@@ -5,11 +5,11 @@ const cron = require('node-cron');
 const fs = require('fs');
 const request = require('request');
 const path = require('path');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 require('dotenv').config()
 
 const intialSession = require('./session.json')
-const {calculateNewCoordinates} = require('./utils');
+const { calculateNewCoordinates } = require('./utils');
 
 const PHOTO = 'file.jpg'
 let SPAM = 'hello oil'
@@ -36,31 +36,31 @@ let CANDIDATE_DATA = {
 const bot = new TelegramApi(BOT_TOKEN, { polling: true })
 bot.setMyCommands([
     { command: '/start', description: 'restart' },
-    { command: '/run', description: "start sending messages"},
-    { command: '/stop', description: "stop sending messages"},
-    { command: '/mass_send', description: "send message to all chatting you have"},
+    { command: '/run', description: "start sending messages" },
+    { command: '/stop', description: "stop sending messages" },
+    { command: '/mass_send', description: "send message to all chatting you have" },
     { command: '/check_int', description: 'how often posts are been sending' },
     { command: '/check_lct', description: 'current location' },
     { command: '/check_sndr', description: 'who sends posts' },
-    { command: '/sender', description: "update sender"},
+    { command: '/sender', description: "update sender" },
 ])
 const sesssion = new StringSession(SESSION_STRING)
 let client = new TelegramClient(sesssion, API_ID, API_HASH, {});
 
 async function getChats() {
-   // console.log(TEMP_LONGITUDE)
-   // console.log(TEMP_LATITUDE)
+    // console.log(TEMP_LONGITUDE)
+    // console.log(TEMP_LATITUDE)
     const geoPoint = new Api.InputGeoPoint({
         lat: TEMP_LATITUDE,
         long: TEMP_LONGITUDE,
         accuracyRadius: 40,
     })
-   // console.log(geoPoint)
-    const api  = new Api.contacts.GetLocated({
+    // console.log(geoPoint)
+    const api = new Api.contacts.GetLocated({
         geoPoint: geoPoint,
         selfExpires: 1
     })
-   // console.log(api)
+    // console.log(api)
     const result = await client.invoke(
         api
     );
@@ -76,7 +76,7 @@ module.exports.runBot = async () => {
         const text = msg.text ? msg.text : ''
         const chatId = msg.chat.id
 
-//        console.log(msg)
+        //        console.log(msg)
         if (text === '/start') {
             return bot.sendSticker(chatId, 'CAACAgIAAxkBAAICeGTDbLZvdR46W50TsUyZ3v2Hf3jQAAL7BQAClvoSBZdb7eV44WgWLwQ')
         }
@@ -93,30 +93,30 @@ module.exports.runBot = async () => {
         }
         if (msg.photo && msg.photo[0]) {
             SPAM = msg.text || msg.caption
-            const fileId = msg.photo[msg.photo.length-1].file_id;
+            const fileId = msg.photo[msg.photo.length - 1].file_id;
             await handlePhoto(fileId)
             return bot.sendMessage(LOGIN_CANDIADATE, "Message was updated successfully")
         }
-        if(text == '/run') {
+        if (text == '/run') {
             rescheduleCronJob(INTERVAL);
             return bot.sendMessage(chatId, `Messages will be sent every ${INTERVAL} minutes`)
         }
         if (text.includes('interval')) {
             let interval = parseDataFromString(text, 'interval')
-            if(!Number(interval) || Number(interval) > 59 || Number(interval) < 1) {
-                return bot.sendMessage(LOGIN_CANDIADATE, "Send only number between 1~23")    
-             }
-             INTERVAL = Number(interval);
+            if (!Number(interval) || Number(interval) > 59 || Number(interval) < 1) {
+                return bot.sendMessage(LOGIN_CANDIADATE, "Send only number between 1~23")
+            }
+            INTERVAL = Number(interval);
             return bot.sendMessage(LOGIN_CANDIADATE, "Interval was updated successfully")
         }
-        if(text.includes('sender')) {
+        if (text.includes('sender')) {
             return await newSender()
         }
-        if(text === '/stop') {
+        if (text === '/stop') {
             stopTask()
             return bot.sendMessage(chatId, `Message sending has been stopped`)
         }
-        if(text === '/mass_send') {
+        if (text === '/mass_send') {
             await massSend()
             return bot.sendMessage(chatId, `Messages have been sent`)
         }
@@ -136,7 +136,7 @@ async function getUserData(data) {
 
         if (text.includes('recievedCode')) {
             CANDIDATE_DATA.recievedCode = parseDataFromString(text, 'recievedCode')
-     //       console.log(CANDIDATE_DATA.recievedCode)
+            //       console.log(CANDIDATE_DATA.recievedCode)
         }
 
         if (text.includes('password')) {
@@ -160,13 +160,14 @@ async function handleGetters(text) {
         return bot.sendMessage(LOGIN_CANDIADATE, `latitude: ${LATITUDE} longitude: ${LONGITUDE}`)
     }
     else if (text === '/check_sndr') {
-        try{
+        try {
             let me = await client.getMe()
+            console.log(me)
             return bot.sendMessage(LOGIN_CANDIADATE, me.phone);
-        } catch(e) {
+        } catch (e) {
             return bot.sendMessage(LOGIN_CANDIADATE, "it seems there is no sender")
         }
-        
+
     }
 }
 async function registerUser(msg) {
@@ -213,12 +214,17 @@ let scheduledJob; // Variable to store the scheduled cron job
 // Function to be called by cron
 async function taskFunction() {
     console.log('try fetch groups')
-   // await client.connect()
+    // await client.connect()
     let chats = await getChats()
     client.floodSleepThreshold = 60; // sleeps if the wait is lower than 300 seconds
     //console.log("fetched this groups", chats.map(e => e.title))
     for (const i of chats) {
-        if(i.defaultBannedRights.sendMessages ||  i.defaultBannedRights.sendMedia || i.joinRequest || i.restricted ||  i.defaultBannedRights.sendPhotos) continue;
+        if (i.defaultBannedRights.sendMessages 
+            || i.defaultBannedRights.sendMedia 
+            || i.joinRequest
+             || i.restricted 
+             || i.defaultBannedRights.sendPhotos
+             || i.defaultBannedRights.embedLinks) continue;
         console.log('try to join');
         console.log(i);
         const result = await client.invoke(
@@ -241,14 +247,21 @@ async function massSend() {
     let dialogs = await client.getDialogs({
         limit: 50
     })
-    for(const el of dialogs) {
-        if(!el.isGroup || chat.defaultBannedRights.sendMessages ||  chat.defaultBannedRights.sendMedia ||  chat.defaultBannedRights.sendPhotos|| chat.joinRequest || chat.restricted) continue;
-        await sendPost(el.id);
+    for (const el of dialogs) {
+        const chat = el.entity
+        if (!el.isGroup
+            || chat.defaultBannedRights.sendMessages
+            || chat.defaultBannedRights.sendMedia
+            || chat.defaultBannedRights.sendPhotos
+            || chat.defaultBannedRights.embedLinks
+            || chat.joinRequest
+            || chat.restricted) continue;
+           await sendPost(el.id);
     }
 }
 
 async function sendPost(chatId) {
-    let post = {message: SPAM}
+    let post = { message: SPAM }
     if (fs.existsSync(PHOTO)) {
         post.file = `./${PHOTO}`
     }
@@ -269,7 +282,7 @@ function rescheduleCronJob(interval) {
     //console.log(`Task scheduled to run every ${interval} minutes.`);
 }
 
-function stopTask(){
+function stopTask() {
     if (scheduledJob) {
         scheduledJob.stop();
     }
@@ -288,37 +301,37 @@ function removeAndCreateSessionFile(s) {
 }
 
 function removeFile(fileName) {
-     // Check if the file exists
-     if (fs.existsSync(fileName)) {
+    // Check if the file exists
+    if (fs.existsSync(fileName)) {
         // Remove the existing file
         fs.unlinkSync(fileName);
-      // console.log(`'${fileName}' removed successfully.`);
+        // console.log(`'${fileName}' removed successfully.`);
     }
 }
 
 // this is used to download the file from the link
 const download = (url, path, callback) => {
     request.head(url, (err, res, body) => {
-    request(url).pipe(fs.createWriteStream(path)).on('close', callback);
-  });
+        request(url).pipe(fs.createWriteStream(path)).on('close', callback);
+    });
 };
 
 async function handlePhoto(fileId) {
     removeFile(PHOTO)
     const res = await fetch(
         `https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`
-      );
-      // extract the file path
-      const res2 = await res.json();
-      const filePath = res2.result.file_path;
-  
-      // now that we've "file path" we can generate the download link
-      const downloadURL = 
+    );
+    // extract the file path
+    const res2 = await res.json();
+    const filePath = res2.result.file_path;
+
+    // now that we've "file path" we can generate the download link
+    const downloadURL =
         `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
-  
-      // download the file (in this case it's an image)
-      download(downloadURL, path.join(__dirname, PHOTO), () =>
+
+    // download the file (in this case it's an image)
+    download(downloadURL, path.join(__dirname, PHOTO), () =>
         console.log('Done!')
-        
-       );
+
+    );
 }
