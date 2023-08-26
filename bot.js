@@ -13,8 +13,8 @@ const { calculateNewCoordinates } = require('./utils');
 
 const PHOTO = 'file.jpg'
 let SPAM = 'hello oil'
-let LATITUDE = 37.468766 //25.254857//
-let LONGITUDE = 126.936944 // 55.329514//
+let LATITUDE = 25.254857//
+let LONGITUDE = 55.329514//
 let INTERVAL = 1
 let API_ID = Number(process.env.API_ID)
 let API_HASH = process.env.API_HASH
