@@ -24,3 +24,9 @@ module.exports.calculateNewCoordinates = (latitude, longitude) => {
     return { latitude: newLat, longitude: newLng };
 }
 
+module.exports.randomSleep = (N, M) => {
+  const randomSeconds = Math.floor(Math.random() * (M - N + 1)) + N;
+  return new Promise(resolve => {
+    setTimeout(resolve, randomSeconds * 1000);
+  });
+}

@@ -9,7 +9,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 require('dotenv').config()
 
 const intialSession = require('./session.json')
-const { calculateNewCoordinates } = require('./utils');
+const { calculateNewCoordinates, randomSleep } = require('./utils');
 
 const PHOTO = 'file.jpg'
 let SPAM = 'hello oil'
@@ -44,6 +44,7 @@ bot.setMyCommands([
     { command: '/check_sndr', description: 'who sends posts' },
     { command: '/sender', description: "update sender" },
 ])
+
 const sesssion = new StringSession(SESSION_STRING)
 let client = new TelegramClient(sesssion, API_ID, API_HASH, {});
 
@@ -98,8 +99,8 @@ module.exports.runBot = async () => {
             return bot.sendMessage(LOGIN_CANDIADATE, "Message was updated successfully")
         }
         if (text == '/run') {
-            rescheduleCronJob(INTERVAL);
-            return bot.sendMessage(chatId, `Messages will be sent every ${INTERVAL} minutes`)
+            const minute = rescheduleCronJob(INTERVAL);
+            return bot.sendMessage(chatId, `Messages will be sent every ${INTERVAL} hours at ${minute}th minute`)
         }
         if (text.includes('interval')) {
             let interval = parseDataFromString(text, 'interval')
@@ -219,6 +220,8 @@ async function taskFunction() {
     client.floodSleepThreshold = 60; // sleeps if the wait is lower than 300 seconds
     //console.log("fetched this groups", chats.map(e => e.title))
     for (const i of chats) {
+        await randomSleep(0, 50) // to avoid spam system
+    
         if (i.defaultBannedRights.sendMessages 
             || i.defaultBannedRights.sendMedia 
             || i.joinRequest
@@ -266,6 +269,7 @@ async function sendPost(chatId) {
         post.file = `./${PHOTO}`
     }
     console.log("try to send message");
+    await randomSleep(0, 50) // to avoid spam system
 
     const msgSend = await client.sendMessage(chatId, post);
 
@@ -274,12 +278,17 @@ async function sendPost(chatId) {
 
 // Cron job function that schedules the taskFunction based on the Interval
 function rescheduleCronJob(interval) {
-    const cronExpression = `*/${interval} * * * *`; // Cron expression for the Interval in minutes
+
+    const eachMinute = Math.floor(Math.random() * (30 - 59 + 1)) + 30;
+
+    const cronExpression = `*/${eachMinute} */${interval} * * *`; // Cron expression for the Interval in minutes
     // Clear the previous cron job before scheduling the new one
     stopTask();
 
     scheduledJob = cron.schedule(cronExpression, taskFunction);
+    console.log(scheduledJob.nextDates(1))
     //console.log(`Task scheduled to run every ${interval} minutes.`);
+    return eachMinute;
 }
 
 function stopTask() {
