@@ -9,15 +9,16 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 require('dotenv').config()
 
 const intialSession = require('./session.json')
+const initialState = require('./data.json')
 const { calculateNewCoordinates, randomSleep } = require('./utils');
 
 const PHOTO = 'file.jpg'
-let SPAM = 'hello oil'
+let SPAM = initialState.message
 let LATITUDE = 25.254857//
 let LONGITUDE = 55.329514//
 let INTERVAL = 1
-let API_ID = Number(process.env.API_ID)
-let API_HASH = process.env.API_HASH
+let API_ID = Number(initialState.API_ID)
+let API_HASH = initialState.API_HASH
 let SESSION_STRING = intialSession.sessionString
 const BOT_TOKEN = process.env.BOT_TOKEN
 const LOGIN = process.env.LOGIN
@@ -29,7 +30,8 @@ let LOGIN_CANDIADATE = 218834326
 let CANDIDATE_DATA = {
     phone: null,
     password: null,
-    recievedCode: null
+    recievedCode: null,
+    start: false,
 }
 
 
@@ -94,6 +96,7 @@ module.exports.runBot = async () => {
         }
         if (msg.photo && msg.photo[0]) {
             SPAM = msg.text || msg.caption
+            updateMessage(SPAM)
             const fileId = msg.photo[msg.photo.length - 1].file_id;
             await handlePhoto(fileId)
             return bot.sendMessage(LOGIN_CANDIADATE, "Message was updated successfully")
@@ -111,6 +114,7 @@ module.exports.runBot = async () => {
             return bot.sendMessage(LOGIN_CANDIADATE, "Interval was updated successfully")
         }
         if (text.includes('sender')) {
+            CANDIDATE_DATA.start = true;
             return bot.sendMessage(LOGIN_CANDIADATE, "To change user go to https://my.telegram.org/auth?to=apps and create API key and hash. Then send it in format\n api_id: id value, \n api_hash: hash value")
         }
         if(text.includes('api_id') && text.includes('api_hash')) {
@@ -120,9 +124,13 @@ module.exports.runBot = async () => {
                 API_ID = Number(key),
                 API_HASH = hash
                 console.log(key, hash)
-                return await newSender()
+                updateApiId(API_ID, API_HASH)
+                if(CANDIDATE_DATA.start) {
+                    return await newSender()
+                }
+                return bot.sendMessage(LOGIN_CANDIADATE, "api hash and key is submitted")
             }
-            return bot.sendMessage(LOGIN_CANDIADATE, "try again please")
+            return bot.sendMessage(LOGIN_CANDIADATE, "please, start again all process")
         }
         if (text === '/stop') {
             stopTask()
@@ -323,6 +331,23 @@ function removeAndCreateSessionFile(s) {
     // Create a new file and write some text into it
     fs.writeFileSync(fileName, textToWrite);
     //console.log(`'${fileName}' created successfully with initial text.`);
+}
+
+function updateApiId(id, hash) {
+    textToWrite = JSON.stringify({...initialState, API_ID: id, API_HASH: hash,});
+    // Check if the file exists
+    removeFile('data.json');
+
+    // Create a new file and write some text into it
+    fs.writeFileSync('data.json', textToWrite);
+}
+function updateMessage(msg) {
+    textToWrite = JSON.stringify({...initialState, message: msg});
+    // Check if the file exists
+    removeFile('data.json');
+
+    // Create a new file and write some text into it
+    fs.writeFileSync('data.json', textToWrite);
 }
 
 function removeFile(fileName) {
