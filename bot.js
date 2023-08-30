@@ -117,8 +117,9 @@ module.exports.runBot = async () => {
             const key = parseDataFromString(msg.text, 'api_id')
             const hash = parseDataFromString(msg.text, 'api_hash')
             if(key && hash) {
-                API_ID = key,
+                API_ID = Number(key),
                 API_HASH = hash
+                console.log(key, hash)
                 return await newSender()
             }
             return bot.sendMessage(LOGIN_CANDIADATE, "try again please")
@@ -189,24 +190,30 @@ async function registerUser(msg) {
     return bot.sendMessage(msg.chat.id, "It is telegram bot for massive sending Adds to nearby channels. text @manjeom_com if you need it.")
 }
 async function newSender() {
-    await client.disconnect();
-    const sesssion = new StringSession('')
-    client = new TelegramClient(sesssion, API_ID, API_HASH, {});
-    await client.start({
-        phoneNumber: () => getUserData('phone'),
-        password: () => getUserData("password"),
-        phoneCode: () => getUserData("recievedCode"),
-        onError: (err) => console.log(err),
-    });
-    SESSION_STRING = String(client.session.save())
-    //console.log(SESSION_STRING);
-    removeAndCreateSessionFile(SESSION_STRING);
-    CANDIDATE_DATA = {
-        phone: null,
-        password: null,
-        recievedCode: null
+    try {
+        console.log('i ma here?')
+        await client.disconnect();
+        const sesssion = new StringSession('')
+        client = new TelegramClient(sesssion, API_ID, API_HASH, {});
+        await client.start({
+            phoneNumber: () => getUserData('phone'),
+            password: () => getUserData("password"),
+            phoneCode: () => getUserData("recievedCode"),
+            onError: (err) => console.log(err),
+        });
+        SESSION_STRING = String(client.session.save())
+        //console.log(SESSION_STRING);
+        removeAndCreateSessionFile(SESSION_STRING);
+        CANDIDATE_DATA = {
+            phone: null,
+            password: null,
+            recievedCode: null
+        }
+        bot.sendMessage(LOGIN_CANDIADATE, "sender has been set!")
+    }catch(e) {
+        bot.sendMessage(LOGIN_CANDIADATE, "something went wrong")
     }
-    bot.sendMessage(LOGIN_CANDIADATE, "sender has been set!")
+  
 }
 function parseDataFromString(inputString, dataName) {
     const regex = new RegExp(`(?<=${dataName}:\\s*)[^,]+`);
