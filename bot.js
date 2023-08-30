@@ -286,7 +286,6 @@ function rescheduleCronJob(interval) {
     stopTask();
 
     scheduledJob = cron.schedule(cronExpression, taskFunction);
-    console.log(scheduledJob.nextDates(1))
     //console.log(`Task scheduled to run every ${interval} minutes.`);
     return eachMinute;
 }
