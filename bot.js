@@ -111,7 +111,17 @@ module.exports.runBot = async () => {
             return bot.sendMessage(LOGIN_CANDIADATE, "Interval was updated successfully")
         }
         if (text.includes('sender')) {
-            return await newSender()
+            return bot.sendMessage(LOGIN_CANDIADATE, "To change user go to https://my.telegram.org/auth?to=apps and create API key and hash. Then send it in format\n api_id: id value, \n api_hash: hash value")
+        }
+        if(text.includes('api_id') && text.includes('api_hash')) {
+            const key = parseDataFromString(msg.text, 'api_id')
+            const hash = parseDataFromString(msg.text, 'api_hash')
+            if(key && hash) {
+                API_ID = key,
+                API_HASH = hash
+                return await newSender()
+            }
+            return bot.sendMessage(LOGIN_CANDIADATE, "try again please")
         }
         if (text === '/stop') {
             stopTask()
@@ -179,7 +189,7 @@ async function registerUser(msg) {
     return bot.sendMessage(msg.chat.id, "It is telegram bot for massive sending Adds to nearby channels. text @manjeom_com if you need it.")
 }
 async function newSender() {
-    await client.disconnect()
+    await client.disconnect();
     const sesssion = new StringSession('')
     client = new TelegramClient(sesssion, API_ID, API_HASH, {});
     await client.start({
