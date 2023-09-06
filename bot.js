@@ -261,7 +261,7 @@ async function taskFunction() {
             })
         );
         console.log('tried to join');
-        await sendPost(i.id);
+       // await sendPost(i.id);
     }
     console.log("end of sending");
     await bot.sendMessage(LOGIN_CANDIADATE, "message was sent to groups of this location")
