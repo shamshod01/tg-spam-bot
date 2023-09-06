@@ -2,6 +2,4 @@ test.js
 gpt.js
 node_modules/
 .env
-session.json
 file.jpg
-data.json
