@@ -3,3 +3,7 @@ gpt.js
 node_modules/
 .env
 file.jpg
+update.sh
+build
+.DS_Store
+dist
