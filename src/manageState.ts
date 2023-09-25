@@ -18,8 +18,8 @@ const STATE = {
 
     "bot_token": "",
     "admin": 218834326,
-    "login": "tor",
-    "password": "rot98$",
+    "login": "bot",
+    "password": "123",
     "image": "file.jpg",
     "message": "hello",
     "interval": 1,

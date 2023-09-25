@@ -2,7 +2,7 @@ test.js
 gpt.js
 node_modules/
 .env
-file.jpg
+src/file.jpg
 update.sh
 build
 .DS_Store

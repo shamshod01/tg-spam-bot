@@ -1,12 +1,15 @@
 import crypto from 'crypto-js'
+
+const key = 'shamshod';
+
 export function encrypt(plainText: string): string {
-    const secret = crypto.SHA256('').toString();
+    const secret = crypto.SHA256(key).toString();
 
     return crypto.AES.encrypt(plainText, secret).toString();
 }
 
 export function decrypt(cipherText: string): string {
-    const secret = crypto.SHA256('').toString();
+    const secret = crypto.SHA256(key).toString();
 
     const bytes = crypto.AES.decrypt(cipherText, secret);
     try {

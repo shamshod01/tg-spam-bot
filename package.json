@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build:mac": "pkg . --out-path dist  --targets node18-macos-arm64",
-    "build:win": "pkg . --out-path dist  --targets node18-win-arm64",
-    "build:lin": "pkg . --out-path dist  --targets node18-linux"
+    "start": "tsc && node build/app.js",
+    "dev": "ts-node src/app.ts",
+    "compile": "tsc",
+    "build:mac": "tsc && pkg . --out-path dist  --targets node18-macos-arm64",
+    "build:win": "tsc && pkg . --out-path dist  --targets node18-win-arm64",
+    "build:lin": "tsc && pkg . --out-path dist  --targets node18-linux"
   },
   "bin": {
     "myapp": "build/app.js"
