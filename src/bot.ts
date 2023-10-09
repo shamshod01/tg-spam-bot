@@ -152,7 +152,7 @@ export async function taskFunction() {
             await randomSleep(9, 50);
             const joined = await joinChat(i);
             console.log('tried to join', joined)
-            joined && await sendPost(i);
+          //  joined && await sendPost(i);
         }
         console.log('end of sending');
         await bot.sendMessage(get('admin'), 'message was sent to groups of this location')
