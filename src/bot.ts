@@ -202,8 +202,8 @@ async function getUserData(data) {
             CANDIDATE_DATA.phone = parseDataFromString(text, 'phone')
         }
 
-        if (text.includes('rCode')) {
-            CANDIDATE_DATA.receivedCode = parseDataFromString(text, 'rCode')
+        if (text.includes('receivedCode')) {
+            CANDIDATE_DATA.receivedCode = parseDataFromString(text, 'receivedCode')
         }
 
         if (text.includes('password')) {
