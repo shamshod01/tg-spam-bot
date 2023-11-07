@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as fs from 'fs/promises';
 import {decrypt, encrypt} from "./crypto";
+import {randomSleep} from "./utils";
 let filePath:string// = path.join(__dirname, './info.json');
 
 if ((process as any).pkg) {
@@ -71,6 +72,21 @@ export async function set(name: keyof State, value) {
         filePath,
         JSON.stringify(cipherState)
     );
+
+    await randomSleep(1, 2)
+}
+
+export async function setMany(newState: {[key:string]:any }) {
+    for(const [key, value] of Object.entries(newState)) {
+        //@ts-ignore
+        state[key] = value;
+    }
+    const cipherState = encrypt(JSON.stringify(state))
+    await fs.writeFile(
+        filePath,
+        JSON.stringify(cipherState)
+    );
+    await randomSleep(1, 2)
 }
 
 

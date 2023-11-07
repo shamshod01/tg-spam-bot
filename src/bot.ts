@@ -1,4 +1,4 @@
-import {get, initState, set} from "./manageState";
+import {get, initState, set, setMany} from "./manageState";
 import TelegramBot from "node-telegram-bot-api";
 import {client, getChats, joinChat, massSend, sendPost} from './client';
 import {calculateNewCoordinates, handlePhoto, parseDataFromString, randomSleep} from "./utils";
@@ -63,8 +63,12 @@ export const runBot = async () => {
             return bot.sendMessage(chatId, "It is telegram bot for massive sending Adds to nearby channels. text @manjeom_com if you need it.")
 
         if(msg.location) {
-            await set('latitude', msg.location.latitude);
-            await set('longitude', msg.location.longitude);
+            //await set('latitude', msg.location.latitude);
+            //await set('longitude', msg.location.longitude);
+            await setMany({
+                latitude: msg.location.latitude,
+                longitude: msg.location.longitude,
+            })
             return bot.sendMessage(chatId, "Location has been updated successfully")
         }
         if (msg.photo && msg.photo[0]) {
@@ -104,8 +108,12 @@ export const runBot = async () => {
             const key = parseDataFromString(msg.text, 'api_id')
             const hash = parseDataFromString(msg.text, 'api_hash')
             if(key && hash) {
-                await set('api_id', Number(key));
-                await set('api_hash', hash);
+                //await set('api_id', Number(key));
+                //await set('api_hash', hash);
+                await setMany({
+                    api_id: Number(key),
+                    api_hash: hash
+                })
                 if(!get('session')) {
                     return await newSender()
                 }

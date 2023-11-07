@@ -1,4 +1,4 @@
-import {get, set} from "./manageState";
+import {get, setMany} from "./manageState";
 import fs from "fs";
 import request from "request";
 import path from "path";
@@ -12,13 +12,13 @@ export const calculateNewCoordinates = async () => {
     const longitude = get('longitude');
 
     //change location;
-    MOVEMENT_DISTANCE = MOVE_FAR ? MOVEMENT_DISTANCE+1 : MOVEMENT_DISTANCE-1;
-    if(MOVEMENT_DISTANCE === 11 || MOVEMENT_DISTANCE === 0) {
+    MOVEMENT_DISTANCE = MOVE_FAR ? MOVEMENT_DISTANCE+0.5 : MOVEMENT_DISTANCE-0.5;
+    if(Math.ceil(MOVEMENT_DISTANCE) === 11 || Math.ceil(MOVEMENT_DISTANCE) === 0) {
         MOVE_FAR = !MOVE_FAR;
-        MOVEMENT_DISTANCE = MOVE_FAR ? MOVEMENT_DISTANCE+1 : MOVEMENT_DISTANCE-1;
+        MOVEMENT_DISTANCE = MOVE_FAR ? MOVEMENT_DISTANCE+0.5 : MOVEMENT_DISTANCE-0.5;
         DIRECTION = DIRECTION + 15 === 360 ? 0 : DIRECTION + 15
     }
-    //  console.log(MOVEMENT_DISTANCE, DIRECTION);
+  //   console.log(MOVEMENT_DISTANCE, DIRECTION);
     const angle = DIRECTION;
     const distance = MOVEMENT_DISTANCE*1000;
 
@@ -29,16 +29,17 @@ export const calculateNewCoordinates = async () => {
     const newLat = latitude + (deltaLat * 180) / Math.PI;
     const newLng = longitude + (deltaLng * 180) / Math.PI;
 
-
-    await set('movement_distance', MOVEMENT_DISTANCE);
-    await set('movement_direction', DIRECTION);
-    await set('latitude', newLat);
-    await set('longitude', newLng);
+    await setMany({
+        movement_direction: DIRECTION,
+        movement_distance: MOVEMENT_DISTANCE,
+        latitude: newLat,
+        longitude: newLng
+    })
 
     return { latitude: newLat, longitude: newLng };
 }
-export const randomSleep = (N, M) => {
-    const randomSeconds = Math.floor(Math.random() * (M - N + 1)) + N;
+export const randomSleep = (secondsN, secondsM) => {
+    const randomSeconds = Math.floor(Math.random() * (secondsM - secondsN + 1)) + secondsN;
     return new Promise(resolve => {
         setTimeout(resolve, randomSeconds * 1000);
     });
