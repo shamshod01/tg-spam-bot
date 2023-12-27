@@ -1,4 +1,4 @@
-# TMS - Telegram Message Sender
+# TMS = Telegram Message Sender
 TMS is auto message sending tool from your account. Sign in to bot with your telegram account and it will send messages from your account automatically.
 
 ## Main features
