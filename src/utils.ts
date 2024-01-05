@@ -8,15 +8,15 @@ let MOVE_FAR = true;
 export const calculateNewCoordinates = async () => {
     let DIRECTION = get('movement_direction');
     let MOVEMENT_DISTANCE = get('movement_distance');
-    const latitude = get('latitude');
-    const longitude = get('longitude');
+    const latitude = get('init_latitude');
+    const longitude = get('init_longitude');
 
-    //change location;
+     //change location;
     MOVEMENT_DISTANCE = MOVE_FAR ? MOVEMENT_DISTANCE+0.5 : MOVEMENT_DISTANCE-0.5;
     if(Math.ceil(MOVEMENT_DISTANCE) === 11 || Math.ceil(MOVEMENT_DISTANCE) === 0) {
         MOVE_FAR = !MOVE_FAR;
         MOVEMENT_DISTANCE = MOVE_FAR ? MOVEMENT_DISTANCE+0.5 : MOVEMENT_DISTANCE-0.5;
-        DIRECTION = DIRECTION + 15 === 360 ? 0 : DIRECTION + 15
+        DIRECTION = DIRECTION + 15 >= 360 ? 0 : DIRECTION + 15
     }
   //   console.log(MOVEMENT_DISTANCE, DIRECTION);
     const angle = DIRECTION;

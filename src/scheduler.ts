@@ -11,7 +11,7 @@ export function stopTask() {
 export function rescheduleCronJob(interval, taskFunction) {
     const eachMinute = Math.floor(Math.random() * (30 - 59 + 1)) + 30;
 
-    const cronExpression = `*/${eachMinute} */${interval} * * *`; // Cron expression for the Interval in minutes
+    const cronExpression = `*/${eachMinute} * * * * *`; // Cron expression for the Interval in minutes
     // Clear the previous cron job before scheduling the new one
     stopTask();
 

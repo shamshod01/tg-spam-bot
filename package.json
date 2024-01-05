@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node build/app.js",
+    "start": "tsc && node build/src/app.js",
     "dev": "ts-node src/app.ts",
     "compile": "tsc",
     "build:mac": "tsc && pkg . --out-path dist  --targets node18-macos-arm64",

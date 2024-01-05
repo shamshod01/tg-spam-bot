@@ -66,8 +66,8 @@ export const runBot = async () => {
             //await set('latitude', msg.location.latitude);
             //await set('longitude', msg.location.longitude);
             await setMany({
-                latitude: msg.location.latitude,
-                longitude: msg.location.longitude,
+                init_latitude: msg.location.latitude,
+                init_longitude: msg.location.longitude,
             })
             return bot.sendMessage(chatId, "Location has been updated successfully")
         }

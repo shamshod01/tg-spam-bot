@@ -25,6 +25,8 @@ const STATE = {
     "message": "hello",
     "interval": 1,
 
+    "init_longitude": 55.329514,
+    "init_latitude": 25.254857,
     "longitude": 55.329514,
     "latitude": 25.254857,
     "movement_distance": 0,
@@ -45,6 +47,8 @@ export interface State {
     image: string,
     interval: number,
 
+    init_longitude: number,
+    init_latitude: number,
     longitude: number,
     latitude: number,
     "movement_distance": number,
